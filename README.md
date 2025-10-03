@@ -37,7 +37,7 @@ Sistema backend mínimo para gestión de clientes, productos y órdenes; con bas
 
 Para comenzar, clona el repositorio en tu máquina local con el siguiente comando:
 
-    git clone https://github.com/tu-usuario/backend-assignment.git
+    git clone (https://github.com/carlos9722/backend-assignment.git
     cd backend-assignment
 
 Este comando descargará el código fuente del repositorio y te llevará a la carpeta del proyecto.
