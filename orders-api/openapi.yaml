@@ -1,0 +1,177 @@
+openapi: 3.0.0
+info:
+  title: Orders API
+  version: 1.0.0
+  description: API para gestión de productos y órdenes
+
+servers:
+  - url: http://localhost:3002
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        sku:
+          type: string
+        name:
+          type: string
+        price_cents:
+          type: integer
+        stock:
+          type: integer
+
+    OrderItem:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        qty:
+          type: integer
+
+    Order:
+      type: object
+      properties:
+        customer_id:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+
+security:
+  - bearerAuth: []
+
+paths:
+  /products:
+    post:
+      summary: Crear producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Producto creado
+    get:
+      summary: Buscar productos
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: cursor
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de productos
+
+  /products/{id}:
+    get:
+      summary: Obtener producto por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Producto encontrado
+    patch:
+      summary: Actualizar stock/precio del producto
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price_cents:
+                  type: integer
+                stock:
+                  type: integer
+      responses:
+        '200':
+          description: Producto actualizado
+
+  /orders:
+    post:
+      summary: Crear orden
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '201':
+          description: Orden creada
+
+  /orders/{id}:
+    get:
+      summary: Obtener orden con items
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orden detallada
+
+  /orders/{id}/confirm:
+    post:
+      summary: Confirmar orden (idempotente)
+      parameters:
+        - in: header
+          name: X-Idempotency-Key
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orden confirmada
+
+  /orders/{id}/cancel:
+    post:
+      summary: Cancelar orden
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orden cancelada
+        '400':
+          description: Cancelación no permitida
